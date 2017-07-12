@@ -43,7 +43,7 @@ epsilon = math.pow(0.95, 2)
 
 for _ in range(0, 1):
 #KEEP THESE PARAMETERS FOR NOW!!
-	solver = POMCP_Solver(0.95, epsilon, 100000, initial_history, game, 125, 5)
+	solver = POMCP_Solver(0.95, epsilon, 100000, initial_history, game, 300, 5)
 	solver.search()
 	print("_____________________")
 

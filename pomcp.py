@@ -27,6 +27,8 @@ class POMCP_Solver:
 		print(len(self.actions))
 		self.human_actions = self.game.getAllHumanActions()
 		self.theta_list = self.game.getAllTheta()
+		self.decision_rules = self.game.getAllDecisionRules()
+		self.robot_actions = self.game.getAllRobotActions()
 
 	def search(self):
 		"""
@@ -47,6 +49,8 @@ class POMCP_Solver:
 		optimal_child = self.history.children[self.actions.index(optimal_action)]
 
 		print((optimal_action, optimal_child.value))
+		print(optimal_child.visited)
+		print(self.history.decision_rule_visited)
 
 		l = []
 		for child in self.history.children:
@@ -86,6 +90,15 @@ class POMCP_Solver:
 		#these should be here.
 		history.update_visited()
 		history.update_value(value)
+		decision_rule = coordinator_action[0]
+		robot_action = coordinator_action[1]
+
+		history.decision_rule_visited[self.decision_rules.index(decision_rule)] += 1
+		history.robot_action_visited[self.robot_actions.index(robot_action)] += 1
+
+		history.decision_rule_values[self.decision_rules.index(decision_rule)] += (1 - history.decision_rule_values[self.decision_rules.index(decision_rule)])/history.decision_rule_visited[self.decision_rules.index(decision_rule)]
+		history.robot_action_values[self.robot_actions.index(robot_action)] += (1 - history.robot_action_values[self.robot_actions.index(robot_action)])/history.robot_action_visited[self.robot_actions.index(robot_action)]
+		
 
 		return value
 
@@ -111,9 +124,11 @@ class POMCP_Solver:
 		if math.pow(self.gamma, depth) < self.epsilon:
 			return 0
 
-		optimal_action = history.optimal_action(self.c)
-		if optimal_action == ([(0, (0.0, 1.0, 0.0)), (1, (1.0, 0.0, 0.0))], (0.0, 0.0, 1.0)):
-			print("now")
+
+		optimal_action = history.optimal_action_factored(self.c)
+		# optimal_action = history.optimal_action(self.c)
+		# if optimal_action == ([(0, (0.0, 1.0, 0.0)), (1, (1.0, 0.0, 0.0))], (0.0, 0.0, 1.0)):
+		# 	print("now")
 		
 		if history.children[self.actions.index(optimal_action)] == "empty":
 			rollout_value = self.rollout_helper(state, optimal_action, history, depth)
@@ -146,6 +161,16 @@ class POMCP_Solver:
 		#I THINK this should be history and not next_history. Otherwise overcount during rollouts.
 		history.update_visited()
 		history.update_value(R)
+
+		decision_rule = optimal_action[0]
+		robot_action = optimal_action[1]
+
+		history.decision_rule_visited[self.decision_rules.index(decision_rule)] += 1
+		history.robot_action_visited[self.robot_actions.index(robot_action)] += 1
+
+		history.decision_rule_values[self.decision_rules.index(decision_rule)] += (R - history.decision_rule_values[self.decision_rules.index(decision_rule)])/history.decision_rule_visited[self.decision_rules.index(decision_rule)]
+		history.robot_action_values[self.robot_actions.index(robot_action)] += (R - history.robot_action_values[self.robot_actions.index(robot_action)])/history.robot_action_visited[self.robot_actions.index(robot_action)]
+		
 
 		return R
 
