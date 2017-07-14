@@ -3,6 +3,7 @@ import math
 
 from humannode import *
 from robotnode import *
+from timeit import default_timer as timer
 
 class POMCP_Solver:
 	def __init__(self, gamma, epsilon, timer, history, game, c, beta):
@@ -29,18 +30,36 @@ class POMCP_Solver:
 		self.theta_list = self.game.getAllTheta()
 		self.decision_rules = self.game.getAllDecisionRules()
 		self.robot_actions = self.game.getAllRobotActions()
+		self.data = []
 
 	def search(self):
 		"""
 		Begins the Search function as described in Silver at al. Samples start states 
 		self.timer many times. Prints optimal action.
 		"""
+		start_0 = timer()
+		start = start_0
 		for _ in range(0, self.timer):
 			print(_)
-			# if _ % 100000 == 0:
-			# 	print(_)
+			if _ % 100000 == 0:
+				print(_)
 			sample_state = self.history.sample_belief()
 			self.simulate(sample_state, self.history, 0)
+			
+			# t = timer()
+			# if t - start > 0.05 and _ > 64:
+			# 	optimal_action = self.history.optimal_action(0)
+			# 	optimal_child = self.history.children[self.actions.index(optimal_action)]
+			# 	self.data.append((t-start_0, optimal_child.value))
+			# 	start = t
+
+			# if timer() - start_0 > 4*60:
+			# 	return
+
+			if _>64 and _%500 == 0:
+				optimal_action = self.history.optimal_action(0)
+				optimal_child = self.history.children[self.actions.index(optimal_action)]
+				self.data.append((_,optimal_child.value))
 			# if _ > 4:
 				# print(self.history.children[self.actions.index((0,0,1))].value)
 				# print(self.history.children[self.actions.index((0,0,1))].visited)
@@ -49,8 +68,8 @@ class POMCP_Solver:
 		optimal_child = self.history.children[self.actions.index(optimal_action)]
 
 		print((optimal_action, optimal_child.value))
-		print(optimal_child.visited)
-		print(self.history.decision_rule_visited)
+		# print(optimal_child.visited)
+		# print(self.history.decision_rule_visited)
 
 		l = []
 		for child in self.history.children:
@@ -71,7 +90,7 @@ class POMCP_Solver:
 		# 	print(t)
 		# 	print(" ")
 		# 	t = 0
-		return
+		return self.data
 
 	def random_sample(self, list_to_sample):
 		random_index = np.random.choice(range(0, len(list_to_sample)))
