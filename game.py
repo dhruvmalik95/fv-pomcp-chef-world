@@ -83,7 +83,7 @@ class Game:
         """
         arrays = []
         for i in range(1, self.num_ingredients):
-            arrays.append(list(range(3))) #dont forget to change
+            arrays.append(list(range(7))) #dont forget to change
         return list(itertools.product(*arrays))
 
     def getAllTheta(self):
